@@ -1,0 +1,227 @@
+<!-- 本地存储 
+todo=[
+	{title:代办事项的标题,done:false},
+	{title:代办事项的标题,done:false},
+	{title:代办事项的标题,done:false},
+	{title:代办事项的标题,done:false}
+]
+eval()          字符串转化为对象
+JSON.stringfy() 把对象转化成字符串
+JSON.parse()    把类对象的字符串转化为对象
+
+getData()
+
+-->
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<style>
+		*{
+			box-sizing:border-box;
+			outline: none;
+		}
+		body,ul,li{
+			list-style:none;
+			margin: 0;
+			padding: 0;
+		}
+		body{
+			background:url(476.jpg) no-repeat;
+			background-size: cover;
+
+		}
+		button{
+			border:none;
+		}
+		h3{
+			padding:0;
+			margin: 0;
+		}
+		header{
+			width: 60%;
+			height: 60px;
+			line-height: 60px;
+			margin: 0 auto;
+			background-color: #DD4F43;
+			border-radius: 6px;
+			margin-bottom: 10px;
+		}
+		header h3{
+			float: left;
+			height: 100%;
+			margin-left: 20px;
+			line-height: 60px;
+			color:#fff;
+		}
+		header div{
+			float: right;
+			height: 100%;
+			margin-right: 20px;
+			line-height: 60px;
+			font-size: 20px;
+			color:#fff;
+		}
+		.list{
+			width:60%;
+			padding: 20px 10px;
+			margin: 0 auto;
+			background-color: #fff;
+			border-radius: 8px;
+			margin-bottom: 50px;
+			min-height: 200px;
+		}
+		.list li{
+			width: 100%;
+			height: 40px;
+			line-height: 40px;
+			margin-left: 40px;
+			margin-bottom: 10px;
+		}
+		.list li button{
+			background:#DD4F43; 
+			color:#fff;
+			border-radius: 5px;
+		}
+		.list li input[type=checkbox]{
+			margin: 0 10px 0 0;
+			float: left;
+			width: 40px;
+			height: 40px;
+		}
+		.list div{
+			float: left;
+			width: 80%;
+			height: 40px;
+			line-height: 40px;
+			background-color: #fff;
+			border-bottom: 1px dashed #000;
+		}
+		.list button{
+			margin: 0 0 0 20px;
+			float: left;
+			height: 40px;
+			line-height: 40px;
+		}
+		nav{
+			width: 60%;
+			margin: 50px auto;
+		}
+		nav input{
+			width: 78%;
+			height: 50px;
+			border-radius: 12px;
+		}
+		nav button{
+			width: 10%;
+			height: 50px;
+			border-radius: 12px;
+			cursor: pointer;
+			background:#19A15F;
+			color:#fff;
+			font-size: 20px;
+		}
+	</style>
+</head>
+<body>
+	<nav class="navbar">			 
+		<input type="text" class="form-control" placeholder="请输入代办事项">		<button type="submit" class="btn">提交</button>
+		<button class="clearAll" style="background:#DD4F43">清空</button>
+	</nav>
+	<section class="ing">
+		<header>
+			<h3>正在进行的</h3>
+			<div class="nnum">10</div>
+		</header>
+		<ul class="list">
+		</ul>
+	</section>
+	<section class="end">
+		<header style="background:#19A15F">
+			<h3>已经完成的</h3>
+			<div class="cnum">10</div>
+		</header>
+		<ul class="list">
+		</ul>
+	</section>
+</body>
+<script>
+
+var createbtn=document.querySelector('.btn');
+var text=document.querySelector('.form-control');
+var nowlist=document.querySelector('.ing .list');
+var comlist=document.querySelector('.end .list');
+var nownum=document.querySelector('.nnum');
+var comnum=document.querySelector('.cnum');
+var clearAllbtn=document.querySelector('.clearAll');
+reWrite();
+createbtn.onclick=function(){
+	if(text.value==""){
+		alert('亲，还没有输入内容呢！');
+		return;
+	}else{
+		var data=getData();
+		data.push({title:text.value,done:false});
+		text.value="";
+		saveDate(data);
+		reWrite();
+	}
+}
+clearAllbtn.onclick=function(){
+	localStorage.clear();
+	reWrite();
+}
+function del(id){
+	var data=getData();
+	data.splice(id,1); //将要删除的数据截取掉
+	saveDate(data);
+	reWrite();
+}//删除一条数据
+function changeData(id,text){
+	var data=getData();
+	if(data[id].title==text){
+		return;
+	}
+	data[id].title=text;
+	saveDate(data);
+	reWrite();
+}//1.修改数据库，2.修改页面。
+function changeState(id,state){
+	var data=getData();
+	data[id].done=state;
+	saveDate(data);
+	reWrite();
+}//修改状态done:true | false
+function getData(){
+	//data==null||"[{}{}]"
+	var data=JSON.parse(localStorage.getItem('todo'));
+	return data || [];
+}//获取数据
+function saveDate(data){
+	//data==null||"[{}{}]"
+	localStorage.setItem('todo',JSON.stringify(data));
+}//保存数据
+function reWrite(){
+	var nstr="";
+	var cstr="";
+	var nnum=0;
+	var cnum=0;
+	var data=getData();
+	data.forEach(function(o,i){
+		if (o.done==false) {
+			nstr+='<li id='+i+'><input type="checkbox"  onclick=changeState('+i+',true)><div class="cont" contenteditable=true onblur=changeData('+i+',this.innerHTML)>'+o.title+'</div><button onclick=del('+i+')>删除</button></li>';
+			nnum++;
+		}else{
+			cstr+='<li id='+i+'><input type="checkbox" checked onclick=changeState('+i+',false)><div class="cont" contenteditable=true onblur=changeData('+i+',this.innerHTML)>'+o.title+'</div><button onclick=del('+i+')>删除</button></li>';
+			cnum++;
+		}
+	})
+	nowlist.innerHTML=nstr;
+	comlist.innerHTML=cstr;
+	nownum.innerHTML=nnum;
+	comnum.innerHTML=cnum;
+}//重绘
+</script>
+</html>
